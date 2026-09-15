@@ -1,3 +1,5 @@
+import { supabase } from "@/integrations/supabase/client";
+
 const TIKTOK_PIXEL_ID = "DAKS6DRC77UES9754TBG";
 
 type TikTokQueue = Array<unknown> & {
@@ -119,24 +121,22 @@ export function trackTikTokCompletePayment({
 
   window.ttq?.track?.("Purchase", properties, { event_id: paymentId });
 
-  // Server-side copy through the Events API — same event_id, so TikTok dedups.
-  void import("./tiktokEvents.functions")
-    .then(({ sendTikTokEvent }) =>
-      sendTikTokEvent({
-        data: {
-          event: "Purchase",
-          eventId: paymentId,
-          value: typeof value === "number" && Number.isFinite(value) ? value : undefined,
-          currency: currency ? currency.toUpperCase() : undefined,
-          productName: productName || undefined,
-          url: window.location.href,
-          referrer: document.referrer || undefined,
-          userAgent: navigator.userAgent,
-          ttclid: readCookie("ttclid") || undefined,
-          ttp: readCookie("_ttp") || undefined,
-        },
-      }),
-    )
+  // Server-side copy through Supabase Edge Functions — same event_id, so
+  // TikTok deduplicates the browser and server copies.
+  void supabase.functions
+    .invoke("tiktok-purchase", {
+      body: {
+        eventId: paymentId,
+        value: typeof value === "number" && Number.isFinite(value) ? value : undefined,
+        currency: currency ? currency.toUpperCase() : undefined,
+        productName: productName || undefined,
+        url: window.location.href,
+        referrer: document.referrer || undefined,
+        userAgent: navigator.userAgent,
+        ttclid: readCookie("ttclid") || undefined,
+        ttp: readCookie("_ttp") || undefined,
+      },
+    })
     .catch(() => undefined);
 }
 
