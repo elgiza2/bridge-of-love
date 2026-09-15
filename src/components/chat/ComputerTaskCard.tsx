@@ -302,8 +302,8 @@ export default function ComputerTaskCard({ taskId }: Props) {
     <div className="my-4 space-y-4">
       {trace}
 
-      {task?.result_text ? (
-        <ChatMessage role="assistant" content={task.result_text} bottomSlot={fileGrid} />
+      {resultText ? (
+        <ChatMessage role="assistant" content={resultText} bottomSlot={fileGrid} />
       ) : (
         fileGrid
       )}
