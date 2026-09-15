@@ -106,7 +106,37 @@ export function trackTikTokCompletePayment({
   if (currency) properties.currency = currency.toUpperCase();
 
   window.ttq?.track?.("CompletePayment", properties, { event_id: paymentId });
+
+  // Server-side copy through the Events API — same event_id, so TikTok dedups.
+  void import("./tiktokEvents.functions")
+    .then(({ sendTikTokEvent }) =>
+      sendTikTokEvent({
+        data: {
+          event: "CompletePayment",
+          eventId: paymentId,
+          value: typeof value === "number" && Number.isFinite(value) ? value : undefined,
+          currency: currency ? currency.toUpperCase() : undefined,
+          productName: productName || undefined,
+          url: window.location.href,
+          referrer: document.referrer || undefined,
+          userAgent: navigator.userAgent,
+          ttclid: readCookie("ttclid") || undefined,
+          ttp: readCookie("_ttp") || undefined,
+        },
+      }),
+    )
+    .catch(() => undefined);
+
   try {
     window.localStorage.setItem(storageKey, new Date().toISOString());
   } catch {}
+}
+
+function readCookie(name: string) {
+  try {
+    const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
+    return match ? decodeURIComponent(match[1]) : null;
+  } catch {
+    return null;
+  }
 }
