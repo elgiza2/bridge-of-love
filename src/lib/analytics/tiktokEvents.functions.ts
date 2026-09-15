@@ -11,7 +11,8 @@ const TIKTOK_PIXEL_ID = "DAKS6DRC77UES9754TBG";
 const ENDPOINT = "https://business-api.tiktok.com/open_api/v1.3/event/track/";
 
 const payloadSchema = z.object({
-  event: z.string().min(1).max(64).default("CompletePayment"),
+  // Purchase is TikTok's standard conversion event for a completed order.
+  event: z.literal("Purchase").default("Purchase"),
   eventId: z.string().min(1).max(200),
   value: z.number().finite().nonnegative().optional(),
   currency: z.string().min(3).max(8).optional(),
@@ -36,7 +37,8 @@ async function sha256(input: string) {
 export const sendTikTokEvent = createServerFn({ method: "POST" })
   .inputValidator((data) => payloadSchema.parse(data))
   .handler(async ({ data }) => {
-    const token = process.env["TIKTOK_EVENTS_ACCESS_TOKEN"];
+    // Never read a VITE_* variable here: the access token must stay server-only.
+    const token = process.env["TIKTOK_EVENTS_ACCESS_TOKEN"]?.trim();
     if (!token) return { ok: false as const, reason: "missing_token" };
 
     const user: Record<string, unknown> = {};

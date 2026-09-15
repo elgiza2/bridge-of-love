@@ -32,6 +32,7 @@ const BillingSuccessPage = () => {
 
   useEffect(() => {
     // Only a payment the database confirmed as paid reaches here.
+    // The tracker also deduplicates refreshes and browser/server copies.
     if (status !== "success" || !details?.payment_id) return;
     trackTikTokCompletePayment({
       paymentId: details.payment_id,

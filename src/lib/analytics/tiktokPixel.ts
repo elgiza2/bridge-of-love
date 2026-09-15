@@ -113,14 +113,14 @@ export function trackTikTokCompletePayment({
   if (typeof value === "number" && Number.isFinite(value)) properties.value = value;
   if (currency) properties.currency = currency.toUpperCase();
 
-  window.ttq?.track?.("CompletePayment", properties, { event_id: paymentId });
+  window.ttq?.track?.("Purchase", properties, { event_id: paymentId });
 
   // Server-side copy through the Events API — same event_id, so TikTok dedups.
   void import("./tiktokEvents.functions")
     .then(({ sendTikTokEvent }) =>
       sendTikTokEvent({
         data: {
-          event: "CompletePayment",
+          event: "Purchase",
           eventId: paymentId,
           value: typeof value === "number" && Number.isFinite(value) ? value : undefined,
           currency: currency ? currency.toUpperCase() : undefined,
