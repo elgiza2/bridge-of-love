@@ -122,7 +122,15 @@ export default function ComputerTaskCard({ taskId }: Props) {
       }
 
     };
-    void tick();
+    void (async () => {
+      const alreadyFinished = await hydrate();
+      // A task that already ended never needs the provider again.
+      if (alreadyFinished || cancelled) {
+        clearActiveComputerRun(taskId);
+        return;
+      }
+      await tick();
+    })();
 
     return () => {
       cancelled = true;
