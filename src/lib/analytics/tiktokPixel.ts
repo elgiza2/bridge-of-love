@@ -3,7 +3,11 @@ const TIKTOK_PIXEL_ID = "DAKS6DRC77UES9754TBG";
 type TikTokQueue = Array<unknown> & {
   load?: (pixelId: string) => void;
   page?: () => void;
-  track?: (event: string, properties?: Record<string, unknown>, options?: Record<string, unknown>) => void;
+  track?: (
+    event: string,
+    properties?: Record<string, unknown>,
+    options?: Record<string, unknown>,
+  ) => void;
   methods?: string[];
   setAndDefer?: (queue: TikTokQueue, method: string) => void;
   instance?: (pixelId: string) => TikTokQueue;
@@ -134,7 +138,6 @@ export function trackTikTokCompletePayment({
       }),
     )
     .catch(() => undefined);
-
 }
 
 const firedPayments = new Set<string>();

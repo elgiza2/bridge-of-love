@@ -126,8 +126,7 @@ const BillingSuccessPage = () => {
           product_name: order.plan ? `${order.plan} Plan` : `${order.credits} MC top-up`,
           amount: Number(order.amount),
           currency: order.currency,
-          payment_id:
-            order.dodo_payment_id || order.dodo_subscription_id || order.order_id,
+          payment_id: order.dodo_payment_id || order.dodo_subscription_id || order.order_id,
           is_subscription: Boolean(order.plan || order.dodo_subscription_id),
         });
         const paidStatuses = new Set(["paid", "succeeded", "completed", "active"]);
