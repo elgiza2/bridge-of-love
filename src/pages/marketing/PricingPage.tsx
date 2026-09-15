@@ -31,7 +31,12 @@ import {
   getDisplayPrice,
   type PlanTier,
 } from "@/data/pricingData";
-import { markCheckoutOpened, hasAbandonedCheckout, TRIAL_PRICE, TRIAL_DAYS } from "@/lib/pricingOffers";
+import {
+  markCheckoutOpened,
+  hasAbandonedCheckout,
+  TRIAL_PRICE,
+  TRIAL_DAYS,
+} from "@/lib/pricingOffers";
 import { dodoProductId } from "@/lib/dodoCatalog";
 import { brandText, getZoneBrand } from "@/lib/zoneBrand";
 import { isEgMode } from "@/lib/egMode";
@@ -257,7 +262,10 @@ const PricingPage = () => {
           onSelect={runCheckout}
           loading={gatewayLoading}
           options={["local", "wallets"]}
-          labels={{ local: "Visa / Mastercard", wallets: "Vodafone Cash" }}
+          labels={{
+            local: "Visa / Mastercard",
+            wallets: "Mobile wallets (Vodafone Cash and others)",
+          }}
         />
       )}
     </Suspense>
@@ -411,7 +419,10 @@ const PricingPage = () => {
 
                     <ul className="mt-6 flex-1 space-y-2.5">
                       {highlights.map((line) => (
-                        <li key={line} className="flex gap-2.5 text-[13.5px] leading-snug text-foreground/85">
+                        <li
+                          key={line}
+                          className="flex gap-2.5 text-[13.5px] leading-snug text-foreground/85"
+                        >
                           <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                           <span>{line}</span>
                         </li>
@@ -436,7 +447,9 @@ const PricingPage = () => {
                     {featured && trialEligible && !isYearly ? (
                       <button
                         type="button"
-                        onClick={() => void handleSubscribe("pro", { trial: true, interval: "monthly" })}
+                        onClick={() =>
+                          void handleSubscribe("pro", { trial: true, interval: "monthly" })
+                        }
                         className="mt-2.5 text-[12.5px] text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
                       >
                         {t.trial}
