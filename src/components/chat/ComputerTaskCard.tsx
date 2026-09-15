@@ -189,12 +189,16 @@ export default function ComputerTaskCard({ taskId }: Props) {
     return <div className="my-4 flex w-full flex-col">{trace}</div>;
   }
 
+  // The provider often hands back its own raw payload (JSON, "Final result:",
+  // internal reprs). Readers get the prose, never the machinery.
+  const resultText = cleanAgentResult(task?.result_text);
+
   if (timedOut || task?.status === "failed") {
     const reason =
-      (timedOut ? "المهمة استغرقت وقتًا أطول من المتوقع وتم إيقافها." : "") ||
+      (timedOut ? labels.timedOut : "") ||
       computerErrorMessage(task?.error) ||
-      (task?.result_text || "").trim() ||
-      "المهمة على الكمبيوتر اتوقفت قبل ما تخلص. جرّب تبعتها تاني بصيغة أوضح.";
+      resultText ||
+      labels.failed;
     return (
       <div className="my-4 space-y-4">
         {trace}
@@ -203,13 +207,11 @@ export default function ComputerTaskCard({ taskId }: Props) {
     );
   }
 
-  if (!task?.result_text && files.length === 0) {
+  if (!resultText && files.length === 0) {
     return (
       <div className="my-4 space-y-4">
         {trace}
-        <p className="text-[13px] leading-relaxed text-muted-foreground">
-          المهمة خلصت من غير نتيجة مكتوبة.
-        </p>
+        <p className="text-[13px] leading-relaxed text-muted-foreground">{labels.empty}</p>
       </div>
     );
   }
