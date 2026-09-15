@@ -44,6 +44,7 @@ import { isArabBilling } from "@/lib/payRegion";
 import { useUserLang } from "@/lib/authI18n";
 import { useIntroTrialEligible, markIntroTrialUsed } from "@/lib/introTrial";
 import { cn } from "@/lib/utils";
+import { useUserPlan } from "@/hooks/useUserPlan";
 
 const LandingFooter = lazy(() => import("@/components/landing/LandingFooter"));
 const PaymentGatewaySheet = lazy(() => import("@/components/billing/PaymentGatewaySheet"));
@@ -64,6 +65,11 @@ const PricingPage = () => {
     trial: boolean;
   } | null>(null);
   const [gatewayLoading, setGatewayLoading] = useState<Gateway | null>(null);
+  const {
+    plan: activePlan,
+    isPaid: hasActiveSubscription,
+    loading: subscriptionLoading,
+  } = useUserPlan();
 
   const BRAND = getZoneBrand();
   const lang = useUserLang();
@@ -87,6 +93,9 @@ const PricingPage = () => {
         popular: "الأكثر اختيارًا",
         trial: `جرّب ${TRIAL_DAYS} أيام بـ ${TRIAL_PRICE}$`,
         faq: "أسئلة شائعة",
+        subscribed: "أنت بالفعل مشترك",
+        upgrade: "ترقية الخطة",
+        cancel: "إلغاء الاشتراك",
       }
     : {
         title: "Simple plans. Everything included.",
@@ -101,6 +110,9 @@ const PricingPage = () => {
         popular: "Most popular",
         trial: `Try ${TRIAL_DAYS} days for $${TRIAL_PRICE}`,
         faq: "Questions",
+        subscribed: "You are already subscribed",
+        upgrade: "Upgrade plan",
+        cancel: "Cancel subscription",
       };
 
   const pricingLd = {
@@ -383,6 +395,7 @@ const PricingPage = () => {
                 const highlights = PLAN_HIGHLIGHTS[plan.tier === "pro" ? "pro" : "max"];
                 const busy = loadingTier === plan.tier;
                 const featured = plan.tier === "pro";
+                const isCurrentPlan = hasActiveSubscription && activePlan === plan.tier;
                 return (
                   <article
                     key={plan.tier}
@@ -429,20 +442,41 @@ const PricingPage = () => {
                       ))}
                     </ul>
 
-                    <button
-                      type="button"
-                      disabled={busy}
-                      onClick={() => void handleSubscribe(plan.tier)}
-                      className={cn(
-                        "mt-6 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full text-[14px] font-semibold transition-opacity disabled:opacity-60",
-                        featured
-                          ? "bg-primary text-primary-foreground hover:opacity-90"
-                          : "border border-border bg-background text-foreground hover:bg-muted",
-                      )}
-                    >
-                      {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                      {t.cta}
-                    </button>
+                    {isCurrentPlan ? (
+                      <div className="mt-6 space-y-2">
+                        <div className="flex h-11 w-full items-center justify-center rounded-full border border-emerald-500/25 bg-emerald-500/10 text-[14px] font-semibold text-emerald-700 dark:text-emerald-300">
+                          {subscriptionLoading ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            t.subscribed
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => navigate("/billing")}
+                          className="h-9 w-full rounded-full text-[12.5px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                        >
+                          {t.cancel}
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => void handleSubscribe(plan.tier)}
+                        className={cn(
+                          "mt-6 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full text-[14px] font-semibold transition-opacity disabled:opacity-60",
+                          hasActiveSubscription
+                            ? "border border-primary/40 bg-primary/5 text-primary hover:bg-primary/10"
+                            : featured
+                              ? "bg-primary text-primary-foreground hover:opacity-90"
+                              : "border border-border bg-background text-foreground hover:bg-muted",
+                        )}
+                      >
+                        {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                        {hasActiveSubscription ? t.upgrade : t.cta}
+                      </button>
+                    )}
 
                     {featured && trialEligible && !isYearly ? (
                       <button

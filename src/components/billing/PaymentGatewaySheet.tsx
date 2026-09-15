@@ -23,7 +23,6 @@ function useIsLightTheme() {
   return light;
 }
 
-
 export type PayOption = "global" | "local" | "wallets";
 export type Gateway = PayOption; // backwards compat
 
@@ -63,7 +62,8 @@ function PaymentGatewaySheetImpl({
   const lang = useUserLang();
   const isArabic = lang.startsWith("ar");
   const resolvedTitle = title === "Choose payment method" && isArabic ? "اختر طريقة الدفع" : title;
-  const resolvedSubtitle = subtitle === "Pick an option." && isArabic ? "اختر الطريقة المناسبة لك." : subtitle;
+  const resolvedSubtitle =
+    subtitle === "Pick an option." && isArabic ? "اختر الطريقة المناسبة لك." : subtitle;
   const localizedLabels: Partial<Record<PayOption, string>> = isArabic
     ? { global: "دفع دولي", local: "بطاقة بنكية", wallets: "محفظة إلكترونية" }
     : {};
@@ -86,10 +86,7 @@ function PaymentGatewaySheetImpl({
       dir={isArabic ? "rtl" : "ltr"}
       className="fixed inset-0 z-[100] flex items-end justify-center bg-foreground/25 sm:items-center"
     >
-      <div
-        className="absolute inset-0 pointer-events-auto"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 pointer-events-auto" onClick={onClose} />
       <motion.div
         data-plus-menu
         onClick={(e) => e.stopPropagation()}
@@ -116,6 +113,14 @@ function PaymentGatewaySheetImpl({
             const isLoading = loading === row.id;
             const disabled = loading !== null && !isLoading;
             const Icon = row.id === "wallets" ? Smartphone : CreditCard;
+            const tone =
+              row.id === "wallets"
+                ? "border-emerald-500/20 bg-emerald-500/[0.06] hover:bg-emerald-500/[0.12]"
+                : "border-blue-500/20 bg-blue-500/[0.06] hover:bg-blue-500/[0.12]";
+            const iconTone =
+              row.id === "wallets"
+                ? "text-emerald-600 dark:text-emerald-400"
+                : "text-blue-600 dark:text-blue-400";
             return (
               <Button
                 data-no-neo
@@ -124,12 +129,10 @@ function PaymentGatewaySheetImpl({
                 disabled={disabled || isLoading}
                 onClick={() => onSelect(row.id)}
                 variant="ghost"
-                className="h-14 w-full justify-start gap-3 rounded-xl border-0 px-3 text-start shadow-none hover:bg-muted/60"
+                aria-label={labels?.[row.id] ?? localizedLabels[row.id] ?? row.label}
+                className={`h-14 w-full justify-start gap-3 rounded-xl border px-3 text-start shadow-none transition-colors ${tone}`}
               >
-                <Icon
-                  className="h-[18px] w-[18px] shrink-0 text-muted-foreground"
-                  strokeWidth={1.75}
-                />
+                <Icon className={`h-[18px] w-[18px] shrink-0 ${iconTone}`} strokeWidth={1.75} />
                 <span className="flex-1 text-[15px] font-medium leading-tight">
                   {labels?.[row.id] ?? localizedLabels[row.id] ?? row.label}
                 </span>
@@ -149,7 +152,6 @@ function PaymentGatewaySheetImpl({
     </div>
   );
 }
-
 
 const PaymentGatewaySheet = memo(PaymentGatewaySheetImpl);
 export default PaymentGatewaySheet;
