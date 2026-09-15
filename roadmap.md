@@ -54,6 +54,8 @@
 ## Requests 15 Sep (evening)
 - [x] Separate Google sign-up button from email sign-up button (more vertical spacing).
 - [x] Keep mobile sidebar/menu toggle on the same side on every page (landing + app pages).
+- [x] TikTok Pixel added site-wide; CompletePayment fires only after a verified paid order, with duplicate protection.
+- [x] Mobile Google and email registration buttons separated with a fixed visible gap.
 - [ ] Chips too small -> enlarged; verify visually.
 - [ ] Plus menu look rejected -> redesign.
 - [ ] Trial offer: show "3 days for $1" in place of $7, auto-renew to $7 after trial.

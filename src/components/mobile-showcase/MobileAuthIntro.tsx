@@ -171,7 +171,7 @@ export default function MobileAuthIntro({
         </AnimatePresence>
 
         {/* CTAs */}
-        <form onSubmit={submitForm} noValidate className="mt-8 space-y-7">
+        <form onSubmit={submitForm} noValidate className="mt-8">
           {/* Google button — collapses away when expanded */}
           <AnimatePresence initial={false}>
             {!expanded && (
@@ -180,8 +180,8 @@ export default function MobileAuthIntro({
                 type="button"
                 onClick={onGoogle}
                 initial={{ opacity: 0, height: 0, marginBottom: -10 }}
-                animate={{ opacity: 1, height: 52, marginBottom: 0 }}
-                exit={{ opacity: 0, height: 0, marginBottom: -10 }}
+                animate={{ opacity: 1, height: 52, marginBottom: 24 }}
+                exit={{ opacity: 0, height: 0, marginBottom: 0 }}
                 transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                 className="theme-fixed w-full flex items-center justify-center gap-2.5 rounded-full bg-white text-background active:scale-[0.985] overflow-hidden"
                 style={{ fontSize: "15px", fontWeight: 600, letterSpacing: "0.1px", touchAction: "manipulation" }}
