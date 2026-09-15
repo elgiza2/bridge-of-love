@@ -9,11 +9,13 @@
 import { useEffect, useRef, useState } from "react";
 import {
   computerErrorMessage,
+  loadStoredComputerTask,
   pollComputerTask,
   stopComputerTask,
   type ComputerTask,
   type ComputerEvent,
 } from "@/lib/computer/client";
+import { cleanAgentResult } from "@/lib/computer/resultText";
 import AgentTrace from "@/components/chat/AgentTrace";
 import ChatMessage from "@/components/chat/ChatMessage";
 import FilePreviewDialog, { type PreviewFile } from "@/components/chat/FilePreviewDialog";
