@@ -5,6 +5,7 @@ import { m as motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import SecondMonthOfferCard from "@/components/billing/SecondMonthOfferCard";
 import { clearAbandonedCheckout } from "@/lib/pricingOffers";
+import { trackTikTokCompletePayment } from "@/lib/analytics/tiktokPixel";
 
 const mobileFont =
   "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif";
@@ -30,6 +31,16 @@ const BillingSuccessPage = () => {
   }, [status]);
 
   useEffect(() => {
+    if (status !== "success" || !details?.payment_id) return;
+    trackTikTokCompletePayment({
+      paymentId: details.payment_id,
+      value: details.amount != null ? Number(details.amount) / 100 : undefined,
+      currency: details.currency,
+      productName: details.product_name,
+    });
+  }, [details, status]);
+
+  useEffect(() => {
     const provider = params.get("provider");
     const kashierOrder = params.get("order");
 
@@ -47,6 +58,7 @@ const BillingSuccessPage = () => {
             product_name: data.plan ? `${data.plan} Plan` : `${data.credits} MC top-up`,
             amount: Number(data.amount) * 100,
             currency: data.currency,
+            payment_id: kashierOrder,
           });
           if (data.status === "paid") return setStatus("success");
           if (data.status === "failed") return setStatus("failed");
@@ -64,31 +76,76 @@ const BillingSuccessPage = () => {
       };
     }
 
-    const identifier =
-      params.get("checkout_id") || params.get("payment_id") || params.get("subscription_id");
+    const checkoutId = params.get("checkout_id");
+    const paymentId = params.get("payment_id");
+    const subscriptionId = params.get("subscription_id");
+    const identifier = checkoutId || paymentId || subscriptionId;
     if (!identifier) {
       setStatus("failed");
       return;
     }
-    (async () => {
-      try {
-        const data = {
-          status:
-            params.get("status") === "active" || params.get("status") === "succeeded"
-              ? "succeeded"
-              : "open",
-          payment_id: params.get("payment_id"),
-          subscription_id: params.get("subscription_id"),
-          checkout_id: identifier,
-        };
-        setDetails(data);
-        if (data.status === "succeeded") setStatus("success");
-        else if (data.status === "open") setStatus("pending");
-        else setStatus("failed");
-      } catch {
-        setStatus("failed");
+    let cancelled = false;
+    const pollDodo = async (attempt = 0) => {
+      if (cancelled) return;
+      const lookups: Array<["order_id" | "dodo_payment_id" | "dodo_subscription_id", string]> = [];
+      if (checkoutId) lookups.push(["order_id", checkoutId]);
+      if (paymentId) lookups.push(["dodo_payment_id", paymentId]);
+      if (subscriptionId) lookups.push(["dodo_subscription_id", subscriptionId]);
+
+      let order: {
+        amount: number;
+        currency: string;
+        credits: number;
+        plan: string | null;
+        status: string;
+        order_id: string;
+        dodo_payment_id: string | null;
+        dodo_subscription_id: string | null;
+      } | null = null;
+
+      for (const [column, value] of lookups) {
+        const { data } = await supabase
+          .from("dodo_orders")
+          .select(
+            "amount, currency, credits, plan, status, order_id, dodo_payment_id, dodo_subscription_id",
+          )
+          .eq(column, value)
+          .maybeSingle();
+        if (data) {
+          order = data;
+          break;
+        }
       }
-    })();
+
+      if (cancelled) return;
+      if (order) {
+        setDetails({
+          product_name: order.plan ? `${order.plan} Plan` : `${order.credits} MC top-up`,
+          amount: Number(order.amount),
+          currency: order.currency,
+          payment_id:
+            order.dodo_payment_id || order.dodo_subscription_id || order.order_id,
+        });
+        const paidStatuses = new Set(["paid", "succeeded", "completed", "active"]);
+        const failedStatuses = new Set(["failed", "cancelled", "canceled", "expired"]);
+        if (paidStatuses.has(order.status.toLowerCase())) {
+          setStatus("success");
+          return;
+        }
+        if (failedStatuses.has(order.status.toLowerCase())) {
+          setStatus("failed");
+          return;
+        }
+      }
+
+      setStatus("pending");
+      if (attempt < 20) window.setTimeout(() => void pollDodo(attempt + 1), 2000);
+    };
+
+    void pollDodo();
+    return () => {
+      cancelled = true;
+    };
   }, [params]);
 
   const handleSuccessContinue = async () => {

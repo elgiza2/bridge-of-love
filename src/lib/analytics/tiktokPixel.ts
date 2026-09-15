@@ -10,6 +10,7 @@ type TikTokQueue = Array<unknown> & {
   _i?: Record<string, TikTokQueue>;
   _t?: Record<string, number>;
   _o?: Record<string, unknown>;
+  _u?: string;
 };
 
 declare global {
