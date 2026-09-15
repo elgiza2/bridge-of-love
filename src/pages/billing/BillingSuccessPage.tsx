@@ -31,7 +31,8 @@ const BillingSuccessPage = () => {
   }, [status]);
 
   useEffect(() => {
-    if (status !== "success" || !details?.payment_id || !details?.is_subscription) return;
+    // Only a payment the database confirmed as paid reaches here.
+    if (status !== "success" || !details?.payment_id) return;
     trackTikTokCompletePayment({
       paymentId: details.payment_id,
       value: details.amount != null ? Number(details.amount) / 100 : undefined,

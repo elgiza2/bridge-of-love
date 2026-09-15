@@ -55,6 +55,7 @@
 - [x] Separate Google sign-up button from email sign-up button (more vertical spacing).
 - [x] Keep mobile sidebar/menu toggle on the same side on every page (landing + app pages).
 - [x] TikTok Pixel added site-wide; CompletePayment fires only after a verified paid order, with duplicate protection.
+- [x] TikTok Events API (server-side) sends the same CompletePayment with a shared event_id; access token stored as a secret, triple duplicate protection.
 - [x] Mobile Google and email registration buttons separated with a fixed visible gap.
 - [ ] Chips too small -> enlarged; verify visually.
 - [ ] Plus menu look rejected -> redesign.
