@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { usePrefetchRoute } from "@/hooks/usePrefetchRoute";
 import { translateExactText, useUserLang } from "@/lib/authI18n";
 import { BrandWord } from "@/components/brand/BrandLogo";
+import { MobileSidebarButton } from "@/components/shared/MobileSidebarButton";
 
 /* ── Mega-menu data ── */
 interface SubItem {
@@ -319,18 +320,27 @@ const LandingNavbar = () => {
             "inset 0 1px 0 rgba(255,255,255,0.35), inset 0 -1px 0 rgba(0,0,0,0.25), 0 18px 50px var(--overlay-black-35)",
         }}
       >
-        {/* Logo */}
-        <a
-          id="nav-logo"
-          href="/"
-          onClick={(e) => {
-            e.preventDefault();
-            navigate("/");
-          }}
-          className="font-display text-3xl font-black uppercase tracking-tight text-foreground"
-        >
-          <BrandWord>MEGSY</BrandWord>
-        </a>
+        <div className="flex items-center gap-1">
+          {/* Mobile toggle — same left position as app pages */}
+          <MobileSidebarButton
+            onClick={() => setMobileOpen(!mobileOpen)}
+            ariaLabel={mobileOpen ? tx("Close") : tx("Menu")}
+            className="md:hidden"
+          />
+
+          {/* Logo */}
+          <a
+            id="nav-logo"
+            href="/"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate("/");
+            }}
+            className="font-display text-3xl font-black uppercase tracking-tight text-foreground"
+          >
+            <BrandWord>MEGSY</BrandWord>
+          </a>
+        </div>
 
         {/* ── Desktop Nav ── */}
         <div className="hidden items-center gap-1 md:flex">
@@ -500,13 +510,6 @@ const LandingNavbar = () => {
           )}
         </div>
 
-        {/* Mobile toggle */}
-        <button
-          onClick={() => setMobileOpen(!mobileOpen)}
-          className="inline-flex min-h-11 min-w-11 items-center justify-center text-sm font-bold uppercase tracking-wider text-foreground md:hidden"
-        >
-          {mobileOpen ? tx("Close") : tx("Menu")}
-        </button>
       </div>
 
       {/* ── Mobile Menu ── */}

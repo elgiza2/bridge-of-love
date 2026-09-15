@@ -971,7 +971,7 @@ const AuthPage = () => {
                         </button>
                       </div>
 
-                      <div className="flex items-center gap-3 my-7">
+                      <div className="flex items-center gap-3 my-10">
                         <div className="flex-1 h-px bg-foreground/10" />
                         <span className="text-[10px] text-foreground/65 uppercase tracking-[0.25em]">
                           {authT("or")}
