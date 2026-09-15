@@ -8,6 +8,7 @@ import {
   clearActiveComputerRun,
   useActiveComputerRun,
 } from "@/lib/computer/activeRun";
+import { stopComputerTask } from "@/lib/computer/client";
 import { stopLongRun } from "@/hooks/useLongRun";
 
 
