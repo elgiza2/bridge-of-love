@@ -31,7 +31,7 @@ const BillingSuccessPage = () => {
   }, [status]);
 
   useEffect(() => {
-    if (status !== "success" || !details?.payment_id) return;
+    if (status !== "success" || !details?.payment_id || !details?.is_subscription) return;
     trackTikTokCompletePayment({
       paymentId: details.payment_id,
       value: details.amount != null ? Number(details.amount) / 100 : undefined,
@@ -59,6 +59,7 @@ const BillingSuccessPage = () => {
             amount: Number(data.amount) * 100,
             currency: data.currency,
             payment_id: kashierOrder,
+            is_subscription: Boolean(data.plan),
           });
           if (data.status === "paid") return setStatus("success");
           if (data.status === "failed") return setStatus("failed");
@@ -125,6 +126,7 @@ const BillingSuccessPage = () => {
           currency: order.currency,
           payment_id:
             order.dodo_payment_id || order.dodo_subscription_id || order.order_id,
+          is_subscription: Boolean(order.plan || order.dodo_subscription_id),
         });
         const paidStatuses = new Set(["paid", "succeeded", "completed", "active"]);
         const failedStatuses = new Set(["failed", "cancelled", "canceled", "expired"]);
