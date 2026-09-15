@@ -89,9 +89,16 @@ export default function ComputerTaskCard({ taskId }: Props) {
         }
         const res = await pollComputerTask(taskId);
         if (cancelled) return;
-        setTask(res.task);
+        // Keep stored results when a late poll comes back empty, so a finished
+        // answer is never blanked out by the provider forgetting the session.
+        setTask((prev) => ({
+          ...res.task,
+          result_text: res.task.result_text ?? prev?.result_text ?? null,
+          files: res.task.files?.length ? res.task.files : (prev?.files ?? []),
+          prompt: res.task.prompt || prev?.prompt || "",
+        }));
         setLoaded(true);
-        setEvents(res.events ?? []);
+        setEvents((prev) => (res.events?.length ? res.events : prev));
         const finished = res.task.status === "done" || res.task.status === "failed";
         // A task the provider stopped reporting on (page closed, provider drop)
         // must never keep the composer locked: after 10 quiet minutes it is
