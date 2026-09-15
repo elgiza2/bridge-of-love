@@ -1981,11 +1981,17 @@ const ChatPage = () => {
 
     if (readableLinks.length > 0) {
       try {
-        const response = await callServerEndpoint("read-url", {
-          urls: readableLinks,
-          maxChars: 7000,
-        });
-        if (response.ok) {
+        // Reading the page must never hold the message hostage: a slow or
+        // unreachable link used to freeze the send button until the request
+        // gave up. After 12s we send the message with the plain URL instead.
+        const response = await Promise.race([
+          callServerEndpoint("read-url", {
+            urls: readableLinks,
+            maxChars: 7000,
+          }),
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), 12000)),
+        ]);
+        if (response && response.ok) {
           const payload = (await response.json()) as {
             pages?: Array<{ url: string; title?: string; text?: string; error?: string }>;
           };
