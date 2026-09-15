@@ -90,9 +90,17 @@ export function trackTikTokCompletePayment({
 }: CompletePayment) {
   if (typeof window === "undefined" || !paymentId) return;
 
+  // Three layers of duplicate protection: an in-memory guard (double effect
+  // runs, rerenders), localStorage (refresh, revisit), and a shared event_id so
+  // TikTok itself drops repeats across browser + server events.
+  if (firedPayments.has(paymentId)) return;
   const storageKey = `megsy_tiktok_complete_payment:${paymentId}`;
   try {
     if (window.localStorage.getItem(storageKey)) return;
+  } catch {}
+  firedPayments.add(paymentId);
+  try {
+    window.localStorage.setItem(storageKey, new Date().toISOString());
   } catch {}
 
   loadTikTokPixel();
@@ -127,10 +135,9 @@ export function trackTikTokCompletePayment({
     )
     .catch(() => undefined);
 
-  try {
-    window.localStorage.setItem(storageKey, new Date().toISOString());
-  } catch {}
 }
+
+const firedPayments = new Set<string>();
 
 function readCookie(name: string) {
   try {
