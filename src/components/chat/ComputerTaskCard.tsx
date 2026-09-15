@@ -43,16 +43,41 @@ export default function ComputerTaskCard({ taskId }: Props) {
   // These two labels used to be hard-coded in Arabic and showed up in English
   // sessions too; follow the user's interface language instead.
   const lang = useUserLang();
-  const labels =
-    lang === "ar-eg"
-      ? { run: "تشغيل المعاينة", tap: "اضغط للمعاينة" }
-      : { run: "Open preview", tap: "Tap to preview" };
+  const isAr = lang === "ar-eg";
+  const labels = isAr
+    ? {
+        run: "تشغيل المعاينة",
+        tap: "اضغط للمعاينة",
+        timedOut: "المهمة استغرقت وقتًا أطول من المتوقع وتم إيقافها.",
+        failed: "المهمة على الكمبيوتر اتوقفت قبل ما تخلص. جرّب تبعتها تاني بصيغة أوضح.",
+        empty: "المهمة خلصت من غير نتيجة مكتوبة.",
+      }
+    : {
+        run: "Open preview",
+        tap: "Tap to preview",
+        timedOut: "This task ran longer than expected and was stopped.",
+        failed: "The computer task stopped before finishing. Try sending it again more clearly.",
+        empty: "The task finished without a written result.",
+      };
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 
   useEffect(() => {
     let cancelled = false;
     const deadline = Date.now() + TASK_TIMEOUT_MS;
+
+    // Paint whatever the database already holds before touching the provider:
+    // a finished task keeps its result, files and step list on re-entry even if
+    // the provider session is long gone.
+    const hydrate = async () => {
+      const stored = await loadStoredComputerTask(taskId);
+      if (cancelled || !stored) return false;
+      setTask(stored.task);
+      setEvents(stored.events);
+      setLoaded(true);
+      return stored.task.status === "done" || stored.task.status === "failed";
+    };
+
 
     const tick = async () => {
       try {
