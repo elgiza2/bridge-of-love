@@ -104,6 +104,58 @@ export async function pollComputerTask(taskId: string) {
   return res;
 }
 
+/**
+ * Reads a task and its steps straight from the database.
+ *
+ * Reopening a conversation must never depend on the provider still knowing
+ * about a session that already finished — that is what made finished results
+ * (text, files and the whole step list) vanish on re-entry. The stored row is
+ * rendered first, and the live poll only continues for tasks still running.
+ */
+export async function loadStoredComputerTask(
+  taskId: string,
+): Promise<{ task: ComputerTask; events: ComputerEvent[] } | null> {
+  try {
+    const [{ data: row }, { data: rows }] = await Promise.all([
+      supabase.from("computer_tasks").select("*").eq("id", taskId).maybeSingle(),
+      supabase
+        .from("computer_events")
+        .select("*")
+        .eq("task_id", taskId)
+        .order("created_at", { ascending: true }),
+    ]);
+    if (!row) return null;
+    const r = row as Record<string, any>;
+    const files = Array.isArray(r.files) ? (r.files as ComputerFile[]) : [];
+    const task: ComputerTask = {
+      id: r.id,
+      status: r.status,
+      progress: typeof r.progress === "string" ? r.progress : null,
+      result_text: r.result_text ?? null,
+      files,
+      error: r.error ?? null,
+      prompt: r.prompt ?? "",
+      live_url: null,
+      created_at: r.created_at ?? null,
+      updated_at: r.updated_at ?? null,
+      provider_session_id: r.provider_session_id ?? null,
+    };
+    const events: ComputerEvent[] = ((rows as Record<string, any>[]) || []).map((e) => ({
+      id: e.id,
+      title: e.title ?? "",
+      detail: e.detail ?? null,
+      url: e.url ?? null,
+      created_at: e.created_at,
+      kind: e.kind ?? null,
+      duration: e.duration ?? null,
+      screenshot_url: e.screenshot_url ?? null,
+    }));
+    return { task, events };
+  } catch {
+    return null;
+  }
+}
+
 const persisted = new Set<string>();
 
 async function persistTerminalState(task: ComputerTask | null | undefined) {
@@ -125,6 +177,9 @@ async function persistTerminalState(task: ComputerTask | null | undefined) {
         status: task.status,
         result_text: task.result_text ?? null,
         error: task.error ?? null,
+        // Produced files were only ever held in the live poll response, so a
+        // reopened conversation lost them. They are part of the result.
+        ...(task.files?.length ? { files: task.files as unknown as never } : {}),
       })
       .eq("id", task.id);
   } catch {

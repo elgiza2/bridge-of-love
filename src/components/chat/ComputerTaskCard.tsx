@@ -9,11 +9,13 @@
 import { useEffect, useRef, useState } from "react";
 import {
   computerErrorMessage,
+  loadStoredComputerTask,
   pollComputerTask,
   stopComputerTask,
   type ComputerTask,
   type ComputerEvent,
 } from "@/lib/computer/client";
+import { cleanAgentResult } from "@/lib/computer/resultText";
 import AgentTrace from "@/components/chat/AgentTrace";
 import ChatMessage from "@/components/chat/ChatMessage";
 import FilePreviewDialog, { type PreviewFile } from "@/components/chat/FilePreviewDialog";
@@ -41,16 +43,41 @@ export default function ComputerTaskCard({ taskId }: Props) {
   // These two labels used to be hard-coded in Arabic and showed up in English
   // sessions too; follow the user's interface language instead.
   const lang = useUserLang();
-  const labels =
-    lang === "ar-eg"
-      ? { run: "تشغيل المعاينة", tap: "اضغط للمعاينة" }
-      : { run: "Open preview", tap: "Tap to preview" };
+  const isAr = lang === "ar-eg";
+  const labels = isAr
+    ? {
+        run: "تشغيل المعاينة",
+        tap: "اضغط للمعاينة",
+        timedOut: "المهمة استغرقت وقتًا أطول من المتوقع وتم إيقافها.",
+        failed: "المهمة على الكمبيوتر اتوقفت قبل ما تخلص. جرّب تبعتها تاني بصيغة أوضح.",
+        empty: "المهمة خلصت من غير نتيجة مكتوبة.",
+      }
+    : {
+        run: "Open preview",
+        tap: "Tap to preview",
+        timedOut: "This task ran longer than expected and was stopped.",
+        failed: "The computer task stopped before finishing. Try sending it again more clearly.",
+        empty: "The task finished without a written result.",
+      };
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 
   useEffect(() => {
     let cancelled = false;
     const deadline = Date.now() + TASK_TIMEOUT_MS;
+
+    // Paint whatever the database already holds before touching the provider:
+    // a finished task keeps its result, files and step list on re-entry even if
+    // the provider session is long gone.
+    const hydrate = async () => {
+      const stored = await loadStoredComputerTask(taskId);
+      if (cancelled || !stored) return false;
+      setTask(stored.task);
+      setEvents(stored.events);
+      setLoaded(true);
+      return stored.task.status === "done" || stored.task.status === "failed";
+    };
+
 
     const tick = async () => {
       try {
@@ -62,9 +89,16 @@ export default function ComputerTaskCard({ taskId }: Props) {
         }
         const res = await pollComputerTask(taskId);
         if (cancelled) return;
-        setTask(res.task);
+        // Keep stored results when a late poll comes back empty, so a finished
+        // answer is never blanked out by the provider forgetting the session.
+        setTask((prev) => ({
+          ...res.task,
+          result_text: res.task.result_text ?? prev?.result_text ?? null,
+          files: res.task.files?.length ? res.task.files : (prev?.files ?? []),
+          prompt: res.task.prompt || prev?.prompt || "",
+        }));
         setLoaded(true);
-        setEvents(res.events ?? []);
+        setEvents((prev) => (res.events?.length ? res.events : prev));
         const finished = res.task.status === "done" || res.task.status === "failed";
         // A task the provider stopped reporting on (page closed, provider drop)
         // must never keep the composer locked: after 10 quiet minutes it is
@@ -88,7 +122,15 @@ export default function ComputerTaskCard({ taskId }: Props) {
       }
 
     };
-    void tick();
+    void (async () => {
+      const alreadyFinished = await hydrate();
+      // A task that already ended never needs the provider again.
+      if (alreadyFinished || cancelled) {
+        clearActiveComputerRun(taskId);
+        return;
+      }
+      await tick();
+    })();
 
     return () => {
       cancelled = true;
@@ -147,12 +189,16 @@ export default function ComputerTaskCard({ taskId }: Props) {
     return <div className="my-4 flex w-full flex-col">{trace}</div>;
   }
 
+  // The provider often hands back its own raw payload (JSON, "Final result:",
+  // internal reprs). Readers get the prose, never the machinery.
+  const resultText = cleanAgentResult(task?.result_text);
+
   if (timedOut || task?.status === "failed") {
     const reason =
-      (timedOut ? "المهمة استغرقت وقتًا أطول من المتوقع وتم إيقافها." : "") ||
+      (timedOut ? labels.timedOut : "") ||
       computerErrorMessage(task?.error) ||
-      (task?.result_text || "").trim() ||
-      "المهمة على الكمبيوتر اتوقفت قبل ما تخلص. جرّب تبعتها تاني بصيغة أوضح.";
+      resultText ||
+      labels.failed;
     return (
       <div className="my-4 space-y-4">
         {trace}
@@ -161,13 +207,11 @@ export default function ComputerTaskCard({ taskId }: Props) {
     );
   }
 
-  if (!task?.result_text && files.length === 0) {
+  if (!resultText && files.length === 0) {
     return (
       <div className="my-4 space-y-4">
         {trace}
-        <p className="text-[13px] leading-relaxed text-muted-foreground">
-          المهمة خلصت من غير نتيجة مكتوبة.
-        </p>
+        <p className="text-[13px] leading-relaxed text-muted-foreground">{labels.empty}</p>
       </div>
     );
   }
