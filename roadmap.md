@@ -52,6 +52,8 @@
 - [done] Clean-design pass: scroll-to-bottom button and sidebar search are borderless/transparent with light 1.75-stroke icons; message "More" button lost its hover fill.
 
 ## Requests 15 Sep (evening)
+- [x] Separate Google sign-up button from email sign-up button (more vertical spacing).
+- [x] Keep mobile sidebar/menu toggle on the same side on every page (landing + app pages).
 - [ ] Chips too small -> enlarged; verify visually.
 - [ ] Plus menu look rejected -> redesign.
 - [ ] Trial offer: show "3 days for $1" in place of $7, auto-renew to $7 after trial.
