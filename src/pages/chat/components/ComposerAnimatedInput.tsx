@@ -8,6 +8,7 @@ import {
   clearActiveComputerRun,
   useActiveComputerRun,
 } from "@/lib/computer/activeRun";
+import { stopComputerTask } from "@/lib/computer/client";
 import { stopLongRun } from "@/hooks/useLongRun";
 
 
@@ -130,7 +131,13 @@ export function ComposerAnimatedInput(props: ComposerAnimatedInputProps) {
           return;
         }
         if (activeComputerRunId) {
+          // Release the composer immediately — stopping used to be routed to the
+          // long-run helper, which knows nothing about computer tasks, so the
+          // button stayed frozen as a stop button forever.
+          clearActiveComputerRun(activeComputerRunId);
+          void stopComputerTask(activeComputerRunId).catch(() => undefined);
           void stopLongRun(activeComputerRunId).catch(() => undefined);
+          handleCancel();
           return;
         }
         handleCancel();
