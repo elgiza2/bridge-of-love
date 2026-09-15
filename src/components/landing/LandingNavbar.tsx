@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { usePrefetchRoute } from "@/hooks/usePrefetchRoute";
 import { translateExactText, useUserLang } from "@/lib/authI18n";
 import { BrandWord } from "@/components/brand/BrandLogo";
+import { MobileSidebarButton } from "@/components/shared/MobileSidebarButton";
 
 /* ── Mega-menu data ── */
 interface SubItem {
