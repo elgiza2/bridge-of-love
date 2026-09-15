@@ -5,15 +5,12 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { closePageView, trackPageView } from "@/lib/analytics/pageViews";
-import { loadTikTokPixel } from "@/lib/analytics/tiktokPixel";
 
 export default function PageViewTracker() {
   const { pathname } = useLocation();
 
   useEffect(() => {
     void trackPageView(pathname);
-    loadTikTokPixel();
-    window.ttq?.page?.();
     const onHide = () => {
       if (document.visibilityState === "hidden") void closePageView();
     };
