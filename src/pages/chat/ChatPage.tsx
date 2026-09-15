@@ -2009,11 +2009,11 @@ const ChatPage = () => {
                 : `URL: ${file.data}\n${page?.error ? `Read error: ${page.error}` : "No readable page text was extracted."}`,
             };
           });
-        } else {
-          toast.error("Could not read the attached link");
         }
+        // A link that cannot be read is not a failed message: the URL itself is
+        // still sent, so the turn proceeds without an error toast.
       } catch {
-        toast.error("Could not read the attached link");
+        /* keep the plain URL and send anyway */
       }
     }
     setAttachedFiles([]);
