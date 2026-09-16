@@ -84,8 +84,14 @@ const AuthPage = () => {
   };
 
   const clearMobileError = () => setMobileError(null);
-  const setEmailClear = (v: string) => { setEmail(v); clearMobileError(); };
-  const setPasswordClear = (v: string) => { setPassword(v); clearMobileError(); };
+  const setEmailClear = (v: string) => {
+    setEmail(v);
+    clearMobileError();
+  };
+  const setPasswordClear = (v: string) => {
+    setPassword(v);
+    clearMobileError();
+  };
 
   useEffect(() => {
     clearMobileError();
@@ -137,7 +143,6 @@ const AuthPage = () => {
   const [showReferralField, setShowReferralField] = useState<boolean>(!!referralCode);
 
   useEffect(() => forceDarkTheme(), []);
-
 
   useEffect(() => {
     const closeMenu = (event: PointerEvent) => {
@@ -197,7 +202,10 @@ const AuthPage = () => {
       }
     } catch (e: any) {
       const msg = String(e?.message || "");
-      const isNetwork = /failed to (send|fetch)|network|load failed|networkerror|internal_error|non-2xx|status code 5\d\d|edge function returned 5\d\d/i.test(msg);
+      const isNetwork =
+        /failed to (send|fetch)|network|load failed|networkerror|internal_error|non-2xx|status code 5\d\d|edge function returned 5\d\d/i.test(
+          msg,
+        );
       if (isNetwork) {
         // Preview proxy can block account lookup. Try sending the OTP — if it
         // succeeds we treat this as a new-account flow. If it also fails, fall
@@ -264,7 +272,9 @@ const AuthPage = () => {
       });
 
       if (error) throw error;
-      const mfa = await getMfaRedirect(redirectUrl || pathForZone("/chat", window.location.pathname));
+      const mfa = await getMfaRedirect(
+        redirectUrl || pathForZone("/chat", window.location.pathname),
+      );
       if (mfa) {
         navigate(mfa);
         return;
@@ -512,7 +522,9 @@ const AuthPage = () => {
           password: newPassword,
         });
         if (!signInErr) {
-          const mfa = await getMfaRedirect(redirectUrl || pathForZone("/chat", window.location.pathname));
+          const mfa = await getMfaRedirect(
+            redirectUrl || pathForZone("/chat", window.location.pathname),
+          );
           if (mfa) {
             navigate(mfa);
             return;
@@ -630,11 +642,12 @@ const AuthPage = () => {
   const handleGoogleLogin = async () => {
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: redirectUrl || window.location.origin + pathForZone("/chat", window.location.pathname) },
+      options: {
+        redirectTo:
+          redirectUrl || window.location.origin + pathForZone("/chat", window.location.pathname),
+      },
     });
   };
-
-
 
   const resetFlow = () => {
     setStep("email");
@@ -656,7 +669,13 @@ const AuthPage = () => {
       total: 2,
       label: authT("signIn"),
     },
-    password: { title: authT("passwordTitle"), sub: email, index: 2, total: 2, label: authT("signIn") },
+    password: {
+      title: authT("passwordTitle"),
+      sub: email,
+      index: 2,
+      total: 2,
+      label: authT("signIn"),
+    },
     "otp-signup": {
       title: authT("verifyEmailTitle"),
       sub: authTf("otpSubTemplate", { email }),
@@ -734,12 +753,7 @@ const AuthPage = () => {
     const isExpanded = step === "email" || step === "password";
     return (
       <>
-        <SEOHead
-          title={authT("seoTitle")}
-          description={authT("seoDesc")}
-          path="/auth"
-          noindex
-        />
+        <SEOHead title={authT("seoTitle")} description={authT("seoDesc")} path="/auth" noindex />
         <MobileAuthIntro
           onGoogle={handleGoogleLogin}
           onEmail={() => setStep("email")}
@@ -774,12 +788,7 @@ const AuthPage = () => {
   ) {
     return (
       <>
-        <SEOHead
-          title={authT("seoTitle")}
-          description={authT("seoDesc")}
-          path="/auth"
-          noindex
-        />
+        <SEOHead title={authT("seoTitle")} description={authT("seoDesc")} path="/auth" noindex />
         <MobileAuthExtras
           screen={step}
           email={email}
@@ -803,19 +812,12 @@ const AuthPage = () => {
     );
   }
 
-
-
   // ─── Mobile email/password flow (over aurora bg) is handled below by adding
   //     a mobile back button that returns to intro1 ────────────────────────
 
   return (
     <>
-      <SEOHead
-        title={authT("seoTitle")}
-        description={authT("seoDesc")}
-        path="/auth"
-        noindex
-      />
+      <SEOHead title={authT("seoTitle")} description={authT("seoDesc")} path="/auth" noindex />
       <div className="auth-desktop-split relative min-h-dvh w-full overflow-hidden bg-background text-foreground flex flex-col lg:flex-row">
         {/* Plain black backdrop */}
         <div className="absolute inset-0 -z-10 bg-background" />
@@ -971,7 +973,7 @@ const AuthPage = () => {
                         </button>
                       </div>
 
-                      <div className="flex items-center gap-3 my-10">
+                      <div className="my-6 flex items-center gap-3">
                         <div className="flex-1 h-px bg-foreground/10" />
                         <span className="text-[10px] text-foreground/65 uppercase tracking-[0.25em]">
                           {authT("or")}
@@ -980,10 +982,7 @@ const AuthPage = () => {
                       </div>
 
                       <div className="space-y-3.5">
-                        <button
-                          onClick={handleGoogleLogin}
-                          className={socialCls}
-                        >
+                        <button onClick={handleGoogleLogin} className={socialCls}>
                           <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24">
                             <path
                               d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
@@ -1029,7 +1028,7 @@ const AuthPage = () => {
                           onKeyDown={(e) => e.key === "Enter" && handlePasswordLogin()}
                           autoFocus
                           autoComplete="current-password"
-                           className={`${inputCls} pe-10`}
+                          className={`${inputCls} pe-10`}
                         />
                         <button
                           type="button"
@@ -1054,7 +1053,7 @@ const AuthPage = () => {
                       <button
                         onClick={handlePasswordLogin}
                         disabled={isSubmitting || !password}
-                          className={btnCls(!!password.trim())}
+                        className={btnCls(!!password.trim())}
                       >
                         {isSubmitting ? (
                           <span className="flex items-center justify-center gap-2">
@@ -1114,7 +1113,9 @@ const AuthPage = () => {
                       )}
                       <div className="text-center">
                         {countdown > 0 ? (
-                          <p className="text-[12px] text-foreground/65">{authTf("resendInSecondsTemplate", { n: countdown })}</p>
+                          <p className="text-[12px] text-foreground/65">
+                            {authTf("resendInSecondsTemplate", { n: countdown })}
+                          </p>
                         ) : (
                           <button
                             onClick={() => sendOTP()}
@@ -1312,7 +1313,9 @@ const AuthPage = () => {
 
         {/* Right half — video background with image fallback (desktop only) */}
         <aside className="hidden lg:block lg:w-1/2 lg:min-h-dvh relative overflow-hidden">
-          <img loading="lazy" decoding="async"
+          <img
+            loading="lazy"
+            decoding="async"
             src={`${AUTH_ASSET_BASE}/auth-mobile-fallback.webp`}
             alt=""
             className={`absolute inset-0 block h-full min-h-full w-full min-w-full max-w-none object-cover transition-opacity duration-700 ${videoLoaded ? "opacity-0" : "opacity-100"}`}
@@ -1321,19 +1324,19 @@ const AuthPage = () => {
             className={`absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent transition-opacity duration-700 ${videoLoaded ? "opacity-0" : "opacity-100"}`}
           />
           {!isMobile && (
-          <video
-            data-auth-hero-video
-            poster={AUTH_HERO_POSTER}
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="metadata"
-            onLoadedData={() => setVideoLoaded(true)}
-            className="absolute inset-0 block h-full min-h-full w-full min-w-full max-w-none object-cover"
-          >
-            <source src={AUTH_HERO_MP4} type="video/mp4" />
-          </video>
+            <video
+              data-auth-hero-video
+              poster={AUTH_HERO_POSTER}
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="metadata"
+              onLoadedData={() => setVideoLoaded(true)}
+              className="absolute inset-0 block h-full min-h-full w-full min-w-full max-w-none object-cover"
+            >
+              <source src={AUTH_HERO_MP4} type="video/mp4" />
+            </video>
           )}
         </aside>
       </div>

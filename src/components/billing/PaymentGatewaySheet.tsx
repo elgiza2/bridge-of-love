@@ -108,7 +108,7 @@ function PaymentGatewaySheetImpl({
           </p>
         </div>
 
-        <div className="flex flex-col pb-1">
+        <div className="flex flex-col gap-2.5 pb-1">
           {ROWS.filter((row) => !options || options.includes(row.id)).map((row) => {
             const isLoading = loading === row.id;
             const disabled = loading !== null && !isLoading;
@@ -130,10 +130,10 @@ function PaymentGatewaySheetImpl({
                 onClick={() => onSelect(row.id)}
                 variant="ghost"
                 aria-label={labels?.[row.id] ?? localizedLabels[row.id] ?? row.label}
-                className={`h-14 w-full justify-start gap-3 rounded-xl border px-3 text-start shadow-none transition-colors ${tone}`}
+                className={`h-14 w-full justify-start gap-3 rounded-xl border px-3 text-start text-foreground shadow-none transition-colors ${tone}`}
               >
                 <Icon className={`h-[18px] w-[18px] shrink-0 ${iconTone}`} strokeWidth={1.75} />
-                <span className="flex-1 text-[15px] font-medium leading-tight">
+                <span className="flex-1 text-[15px] font-semibold leading-tight text-foreground">
                   {labels?.[row.id] ?? localizedLabels[row.id] ?? row.label}
                 </span>
                 {isLoading ? (

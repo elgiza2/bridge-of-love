@@ -429,6 +429,16 @@ const PricingPage = () => {
                         {price.discountLabel || plan.monthlyCredits}
                       </p>
                     )}
+                    {featured && trialEligible && !isYearly ? (
+                      <div className="mt-4 rounded-2xl border border-primary/20 bg-primary/[0.06] px-3.5 py-3 text-center">
+                        <p className="text-[13px] font-semibold text-primary">{t.trial}</p>
+                        <p className="mt-1 text-[11.5px] leading-relaxed text-muted-foreground">
+                          {isAr
+                            ? "عرض البداية متاح للحسابات المؤهلة فقط."
+                            : "Available once for eligible accounts."}
+                        </p>
+                      </div>
+                    ) : null}
 
                     <ul className="mt-6 flex-1 space-y-2.5">
                       {highlights.map((line) => (
