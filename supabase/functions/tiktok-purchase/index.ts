@@ -86,7 +86,7 @@ Deno.serve(async (request) => {
       event_source_id: TIKTOK_PIXEL_ID,
       data: [
         {
-          event: "Purchase",
+          event: "CompletePayment",
           event_time: Math.floor(Date.now() / 1000),
           event_id: data.eventId,
           user,

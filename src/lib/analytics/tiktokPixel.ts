@@ -96,20 +96,16 @@ export function trackTikTokCompletePayment({
 }: CompletePayment) {
   if (typeof window === "undefined" || !paymentId) return;
 
-  // Three layers of duplicate protection: an in-memory guard (double effect
-  // runs, rerenders), localStorage (refresh, revisit), and a shared event_id so
-  // TikTok itself drops repeats across browser + server events.
-  if (firedPayments.has(paymentId)) return;
-  const storageKey = `megsy_tiktok_complete_payment:${paymentId}`;
+  // The browser copy is guarded per tab; the server copy is retried until
+  // Supabase confirms success. A permanent guard before the server response
+  // would lose the conversion forever when Events API or the network fails.
+  const pixelStorageKey = `megsy_tiktok_pixel_purchase:${paymentId}`;
+  const serverStorageKey = `megsy_tiktok_server_purchase:${paymentId}`;
+  let pixelAlreadyFired = firedPayments.has(paymentId);
   try {
-    if (window.localStorage.getItem(storageKey)) return;
-  } catch {}
-  firedPayments.add(paymentId);
-  try {
-    window.localStorage.setItem(storageKey, new Date().toISOString());
+    pixelAlreadyFired = pixelAlreadyFired || window.sessionStorage.getItem(pixelStorageKey) === "1";
   } catch {}
 
-  loadTikTokPixel();
   const properties: Record<string, unknown> = {
     content_type: "product",
     content_id: paymentId,
@@ -119,25 +115,49 @@ export function trackTikTokCompletePayment({
   if (typeof value === "number" && Number.isFinite(value)) properties.value = value;
   if (currency) properties.currency = currency.toUpperCase();
 
-  window.ttq?.track?.("Purchase", properties, { event_id: paymentId });
+  if (!pixelAlreadyFired) {
+    firedPayments.add(paymentId);
+    loadTikTokPixel();
+    window.ttq?.track?.("CompletePayment", properties, { event_id: paymentId });
+    try {
+      window.sessionStorage.setItem(pixelStorageKey, "1");
+    } catch {}
+  }
 
   // Server-side copy through Supabase Edge Functions — same event_id, so
   // TikTok deduplicates the browser and server copies.
-  void supabase.functions
-    .invoke("tiktok-purchase", {
-      body: {
-        eventId: paymentId,
-        value: typeof value === "number" && Number.isFinite(value) ? value : undefined,
-        currency: currency ? currency.toUpperCase() : undefined,
-        productName: productName || undefined,
-        url: window.location.href,
-        referrer: document.referrer || undefined,
-        userAgent: navigator.userAgent,
-        ttclid: readCookie("ttclid") || undefined,
-        ttp: readCookie("_ttp") || undefined,
-      },
-    })
-    .catch(() => undefined);
+  let serverAlreadySent = false;
+  try {
+    serverAlreadySent = window.localStorage.getItem(serverStorageKey) === "1";
+  } catch {}
+  if (serverAlreadySent) return;
+
+  void supabase.auth.getUser().then(({ data: { user } }) =>
+    supabase.functions
+      .invoke("tiktok-purchase", {
+        body: {
+          eventId: paymentId,
+          value: typeof value === "number" && Number.isFinite(value) ? value : undefined,
+          currency: currency ? currency.toUpperCase() : undefined,
+          productName: productName || undefined,
+          url: window.location.href,
+          referrer: document.referrer || undefined,
+          userAgent: navigator.userAgent,
+          email: user?.email || undefined,
+          externalId: user?.id || undefined,
+          ttclid: readCookie("ttclid") || undefined,
+          ttp: readCookie("_ttp") || undefined,
+        },
+      })
+      .then(({ data, error }) => {
+        if (!error && data?.ok) {
+          try {
+            window.localStorage.setItem(serverStorageKey, "1");
+          } catch {}
+        }
+      })
+      .catch(() => undefined),
+  );
 }
 
 const firedPayments = new Set<string>();

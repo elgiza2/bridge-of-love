@@ -71,8 +71,10 @@ Deno.serve(async (request) => {
     return json({ error: "invalid payment method" }, 400);
 
   const merchantId = Deno.env.get("KASHIER_MERCHANT_ID")?.trim();
-  const secret = Deno.env.get("KASHIER_SECRET")?.trim();
-  if (!merchantId || !secret) return json({ error: "Kashier is not configured" }, 503);
+  const paymentKey = (
+    Deno.env.get("KASHIER_PAYMENT_API_KEY") || Deno.env.get("KASHIER_SECRET")
+  )?.trim();
+  if (!merchantId || !paymentKey) return json({ error: "Kashier is not configured" }, 503);
 
   const orderId = `ord_${crypto.randomUUID()}`;
   const currency = "EGP";
@@ -91,7 +93,7 @@ Deno.serve(async (request) => {
   if (insertError) return json({ error: insertError.message }, 500);
 
   const path = `/?payment=${merchantId}.${orderId}.${amount}.${currency}`;
-  const hash = await hmacHex(secret, path);
+  const hash = await hmacHex(paymentKey, path);
   const siteUrl = (Deno.env.get("SITE_URL") || "https://megsyai.com").replace(/\/$/, "");
   const redirectUrl = `${siteUrl}/billing/success?provider=kashier&order=${encodeURIComponent(orderId)}`;
   const mode =

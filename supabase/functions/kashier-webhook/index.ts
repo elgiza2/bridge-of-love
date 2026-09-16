@@ -55,8 +55,10 @@ Deno.serve(async (request) => {
   if (request.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (request.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
-  const secret = Deno.env.get("KASHIER_SECRET")?.trim();
-  if (!secret) return json({ error: "Kashier is not configured" }, 503);
+  const paymentKey = (
+    Deno.env.get("KASHIER_PAYMENT_API_KEY") || Deno.env.get("KASHIER_SECRET")
+  )?.trim();
+  if (!paymentKey) return json({ error: "Kashier is not configured" }, 503);
 
   let event: Record<string, unknown>;
   try {
@@ -70,7 +72,7 @@ Deno.serve(async (request) => {
   const signedQuery = buildSignedQuery(data);
   if (!signature || !signedQuery) return json({ error: "missing signature" }, 401);
 
-  const expected = await hmacHex(secret, signedQuery);
+  const expected = await hmacHex(paymentKey, signedQuery);
   if (!safeEqual(expected.toLowerCase(), signature.toLowerCase())) {
     return json({ error: "invalid signature" }, 401);
   }
