@@ -744,9 +744,10 @@ const AuthPage = () => {
         : "bg-transparent text-foreground border-foreground/30"
     }`;
 
-  // Secondary — bare outline pill with iOS press
+  // Secondary auth actions share one measured control style instead of
+  // looking like unrelated buttons with different visual weight.
   const socialCls =
-    "w-full h-12 px-4 flex items-center justify-center gap-2.5 rounded-full border border-foreground/15 bg-transparent text-foreground/90 text-[14px] font-medium hover:border-foreground/40 hover:bg-foreground/[0.03] active:scale-[0.97] transition-[transform,border-color,background-color] duration-[280ms] [transition-timing-function:cubic-bezier(0.34,1.35,0.64,1)] will-change-transform";
+    "flex h-12 w-full items-center justify-center gap-3 rounded-2xl border border-foreground/15 bg-foreground/[0.025] px-4 text-[14px] font-medium text-foreground/90 shadow-sm transition-[transform,border-color,background-color,box-shadow] duration-200 hover:border-foreground/35 hover:bg-foreground/[0.06] hover:shadow-md active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30";
 
   // ─── Mobile intro — inline expandable email/password flow ──
   if (isMobile && (step === "intro1" || step === "email" || step === "password")) {
@@ -981,9 +982,9 @@ const AuthPage = () => {
                         <div className="flex-1 h-px bg-foreground/10" />
                       </div>
 
-                      <div className="space-y-3">
-                        <button onClick={handleGoogleLogin} className={socialCls}>
-                          <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24">
+                      <div className="mt-1 grid gap-2.5">
+                        <button type="button" onClick={handleGoogleLogin} className={socialCls}>
+                          <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
                             <path
                               d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
                               fill="#4285F4"

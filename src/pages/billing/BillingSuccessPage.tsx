@@ -30,7 +30,7 @@ const BillingSuccessPage = () => {
   useEffect(() => {
     if (status === "success") {
       clearAbandonedCheckout();
-      if (details?.is_subscription) markIntroTrialUsed();
+      if (details?.is_trial) markIntroTrialUsed();
     }
   }, [details, status]);
 
@@ -56,7 +56,7 @@ const BillingSuccessPage = () => {
         if (cancelled) return;
         const { data } = await supabase
           .from("kashier_orders")
-          .select("status, amount, currency, credits, plan, method")
+          .select("status, amount, currency, credits, plan, method, raw")
           .eq("order_id", kashierOrder)
           .maybeSingle();
         if (data) {
@@ -66,6 +66,7 @@ const BillingSuccessPage = () => {
             currency: data.currency,
             payment_id: kashierOrder,
             is_subscription: Boolean(data.plan),
+            is_trial: isKashierTrial(data.raw),
           });
           if (data.status === "paid") return setStatus("success");
           if (data.status === "failed") return setStatus("failed");
@@ -108,13 +109,14 @@ const BillingSuccessPage = () => {
         order_id: string;
         dodo_payment_id: string | null;
         dodo_subscription_id: string | null;
+        raw: unknown;
       } | null = null;
 
       for (const [column, value] of lookups) {
         const { data } = await supabase
           .from("dodo_orders")
           .select(
-            "amount, currency, credits, plan, status, order_id, dodo_payment_id, dodo_subscription_id",
+            "amount, currency, credits, plan, status, order_id, dodo_payment_id, dodo_subscription_id, raw",
           )
           .eq(column, value)
           .maybeSingle();
@@ -132,6 +134,7 @@ const BillingSuccessPage = () => {
           currency: order.currency,
           payment_id: order.dodo_payment_id || order.dodo_subscription_id || order.order_id,
           is_subscription: Boolean(order.plan || order.dodo_subscription_id),
+          is_trial: isTrialOrder(order.raw),
         });
         const paidStatuses = new Set(["paid", "succeeded", "completed", "active"]);
         const failedStatuses = new Set(["failed", "cancelled", "canceled", "expired"]);
@@ -154,6 +157,26 @@ const BillingSuccessPage = () => {
       cancelled = true;
     };
   }, [params]);
+
+  function isTrialOrder(raw: unknown): boolean {
+    if (!raw) return false;
+    try {
+      const text = JSON.stringify(raw).toLowerCase();
+      return (
+        text.includes("plan_pro_m_trial") ||
+        text.includes('"trial":true') ||
+        text.includes('"trial_days":3')
+      );
+    } catch {
+      return false;
+    }
+  }
+
+  function isKashierTrial(raw: unknown): boolean {
+    if (!raw || typeof raw !== "object") return false;
+    const value = raw as { trial_days?: unknown; sku?: unknown };
+    return value.trial_days === 3 || value.sku === "plan_pro_m_trial";
+  }
 
   const handleSuccessContinue = async () => {
     setCreating(true);
