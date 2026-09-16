@@ -94,7 +94,8 @@ Deno.serve(async (request) => {
   const hash = await hmacHex(secret, path);
   const siteUrl = (Deno.env.get("SITE_URL") || "https://megsyai.com").replace(/\/$/, "");
   const redirectUrl = `${siteUrl}/billing/success?provider=kashier&order=${encodeURIComponent(orderId)}`;
-  const serverWebhook = `${Deno.env.get("SUPABASE_URL")}/functions/v1/kashier-webhook`;
+  const mode =
+    (Deno.env.get("KASHIER_MODE") || "live").trim().toLowerCase() === "test" ? "test" : "live";
 
   const params = new URLSearchParams({
     merchantId,
@@ -102,16 +103,14 @@ Deno.serve(async (request) => {
     amount: String(amount),
     currency,
     hash,
-    mode: "live",
+    mode,
     merchantRedirect: redirectUrl,
-    serverWebhook,
     display,
-    paymentRequestId: orderId,
-    metaData: JSON.stringify({ sku, offer, user_id: user.id }),
-    type: "external",
-    interactionSource: "ECommerce",
-    allowedMethods: method,
-    defaultMethod: method,
+    // Kashier's hosted page expects the official comma-separated method list.
+    // The selected method is carried as a UI preference; Kashier may still
+    // show the other enabled method, which avoids the phone-step 403 seen when
+    // a single unsupported method is forced into the legacy HPP URL.
+    allowedMethods: "card,wallet",
   });
 
   return json({
