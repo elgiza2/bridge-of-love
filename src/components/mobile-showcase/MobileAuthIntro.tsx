@@ -97,7 +97,10 @@ export default function MobileAuthIntro({
     <div
       dir={"ltr"}
       className="relative h-[100dvh] min-h-[100svh] w-full overflow-hidden bg-[#02040c] text-foreground"
-      style={{ fontFamily: 'Inter, -apple-system, "SF Pro Text", system-ui, sans-serif', touchAction: "manipulation" }}
+      style={{
+        fontFamily: 'Inter, -apple-system, "SF Pro Text", system-ui, sans-serif',
+        touchAction: "manipulation",
+      }}
     >
       {/* Hero video — poster paints instantly, clip streams in behind it */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden" style={{ zIndex: 0 }}>
@@ -111,7 +114,6 @@ export default function MobileAuthIntro({
           data-auth-hero-video
           className="absolute inset-0 block h-full min-h-full w-full min-w-full max-w-none object-cover"
           style={{ objectPosition: "center 45%" }}
-
         >
           <source src={AUTH_HERO_MP4} type="video/mp4" />
         </video>
@@ -180,17 +182,34 @@ export default function MobileAuthIntro({
                 type="button"
                 onClick={onGoogle}
                 initial={{ opacity: 0, height: 0, marginBottom: -10 }}
-                animate={{ opacity: 1, height: 52, marginBottom: 24 }}
+                animate={{ opacity: 1, height: 52, marginBottom: 12 }}
                 exit={{ opacity: 0, height: 0, marginBottom: 0 }}
                 transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                 className="theme-fixed w-full flex items-center justify-center gap-2.5 rounded-full bg-white text-background active:scale-[0.985] overflow-hidden"
-                style={{ fontSize: "15px", fontWeight: 600, letterSpacing: "0.1px", touchAction: "manipulation" }}
+                style={{
+                  fontSize: "15px",
+                  fontWeight: 600,
+                  letterSpacing: "0.1px",
+                  touchAction: "manipulation",
+                }}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
-                  <path fill="#EA4335" d="M12 5.04c1.94 0 3.66.67 5.02 1.98l3.72-3.72C18.42 1.19 15.44 0 12 0 7.32 0 3.26 2.7 1.28 6.62l4.36 3.38C6.66 7.06 9.14 5.04 12 5.04z"/>
-                  <path fill="#4285F4" d="M23.54 12.28c0-.82-.08-1.62-.22-2.4H12v4.54h6.48c-.28 1.5-1.12 2.78-2.4 3.64l3.7 2.88c2.16-2 3.42-4.94 3.42-8.66z"/>
-                  <path fill="#FBBC05" d="M5.64 14.42a7.1 7.1 0 010-4.84L1.28 6.2A11.98 11.98 0 000 12c0 1.94.46 3.78 1.28 5.4l4.36-2.98z"/>
-                  <path fill="#34A853" d="M12 24c3.24 0 5.96-1.06 7.94-2.9l-3.7-2.88c-1.02.68-2.34 1.1-4.24 1.1-2.86 0-5.34-2.02-6.36-4.96L1.28 17.4C3.26 21.3 7.32 24 12 24z"/>
+                  <path
+                    fill="#EA4335"
+                    d="M12 5.04c1.94 0 3.66.67 5.02 1.98l3.72-3.72C18.42 1.19 15.44 0 12 0 7.32 0 3.26 2.7 1.28 6.62l4.36 3.38C6.66 7.06 9.14 5.04 12 5.04z"
+                  />
+                  <path
+                    fill="#4285F4"
+                    d="M23.54 12.28c0-.82-.08-1.62-.22-2.4H12v4.54h6.48c-.28 1.5-1.12 2.78-2.4 3.64l3.7 2.88c2.16-2 3.42-4.94 3.42-8.66z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M5.64 14.42a7.1 7.1 0 010-4.84L1.28 6.2A11.98 11.98 0 000 12c0 1.94.46 3.78 1.28 5.4l4.36-2.98z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M12 24c3.24 0 5.96-1.06 7.94-2.9l-3.7-2.88c-1.02.68-2.34 1.1-4.24 1.1-2.86 0-5.34-2.02-6.36-4.96L1.28 17.4C3.26 21.3 7.32 24 12 24z"
+                  />
                 </svg>
                 <span>{t.google}</span>
               </motion.button>
@@ -220,9 +239,24 @@ export default function MobileAuthIntro({
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.18, ease: "easeOut" }}
                   className="w-full h-full flex items-center justify-center gap-2 text-foreground active:scale-[0.985]"
-                  style={{ fontSize: "15px", fontWeight: 500, letterSpacing: "0.1px", touchAction: "manipulation" }}
+                  style={{
+                    fontSize: "15px",
+                    fontWeight: 500,
+                    letterSpacing: "0.1px",
+                    touchAction: "manipulation",
+                  }}
                 >
-                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <svg
+                    width="17"
+                    height="17"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden
+                  >
                     <rect x="3" y="5" width="18" height="14" rx="2.5" />
                     <path d="M3.5 7.5l8.5 6 8.5-6" />
                   </svg>
@@ -322,7 +356,12 @@ export default function MobileAuthIntro({
                     ? "btn-sunset theme-fixed"
                     : "rounded-full bg-transparent text-foreground border border-foreground/30"
                 }`}
-                style={{ fontSize: "15px", fontWeight: 600, letterSpacing: "0.1px", touchAction: "manipulation" }}
+                style={{
+                  fontSize: "15px",
+                  fontWeight: 600,
+                  letterSpacing: "0.1px",
+                  touchAction: "manipulation",
+                }}
               >
                 {isSubmitting ? (
                   <span className="w-4 h-4 border-2 border-current/30 border-t-current rounded-full animate-spin" />
@@ -333,7 +372,6 @@ export default function MobileAuthIntro({
                   </>
                 )}
               </motion.button>
-
             )}
           </AnimatePresence>
 
@@ -343,18 +381,21 @@ export default function MobileAuthIntro({
               type="button"
               onClick={onTelegram}
               className="w-full flex items-center justify-center gap-1.5 py-2.5 transition"
-              style={{ color: "rgba(255,255,255,0.55)", fontSize: "13px", fontWeight: 500, touchAction: "manipulation" }}
+              style={{
+                color: "rgba(255,255,255,0.55)",
+                fontSize: "13px",
+                fontWeight: 500,
+                touchAction: "manipulation",
+              }}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                <path d="M9.78 15.27l-.4 4.02c.58 0 .83-.25 1.13-.55l2.71-2.59 5.62 4.11c1.03.57 1.77.27 2.04-.95l3.7-17.34h.01c.32-1.53-.55-2.13-1.55-1.76L1.36 9.36C-.13 9.94-.11 10.75 1.1 11.12l5.6 1.74 13-8.19c.61-.4 1.17-.18.71.22"/>
+                <path d="M9.78 15.27l-.4 4.02c.58 0 .83-.25 1.13-.55l2.71-2.59 5.62 4.11c1.03.57 1.77.27 2.04-.95l3.7-17.34h.01c.32-1.53-.55-2.13-1.55-1.76L1.36 9.36C-.13 9.94-.11 10.75 1.1 11.12l5.6 1.74 13-8.19c.61-.4 1.17-.18.71.22" />
               </svg>
               <span>{t.telegram}</span>
             </button>
           )}
         </form>
-
       </div>
-
     </div>
   );
 }

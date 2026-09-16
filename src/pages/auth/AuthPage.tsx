@@ -738,7 +738,7 @@ const AuthPage = () => {
 
   // Primary CTA — white only after the related field has text.
   const btnCls = (hasValue: boolean) =>
-    `w-full py-3 rounded-full border text-[14px] font-semibold active:scale-[0.97] transition-[transform,border-color,background-color,color,opacity] duration-[280ms] [transition-timing-function:cubic-bezier(0.34,1.35,0.64,1)] disabled:opacity-50 disabled:pointer-events-none will-change-transform ${
+    `w-full h-12 px-4 rounded-full border text-[14px] font-semibold active:scale-[0.97] transition-[transform,border-color,background-color,color,opacity] duration-[280ms] [transition-timing-function:cubic-bezier(0.34,1.35,0.64,1)] disabled:opacity-50 disabled:pointer-events-none will-change-transform ${
       hasValue
         ? "theme-fixed bg-white text-background border-white hover:bg-foreground/90"
         : "bg-transparent text-foreground border-foreground/30"
@@ -746,7 +746,7 @@ const AuthPage = () => {
 
   // Secondary — bare outline pill with iOS press
   const socialCls =
-    "w-full flex items-center justify-center gap-2.5 py-3 rounded-full border border-foreground/15 bg-transparent text-foreground/90 text-[14px] font-medium hover:border-foreground/40 hover:bg-foreground/[0.03] active:scale-[0.97] transition-[transform,border-color,background-color] duration-[280ms] [transition-timing-function:cubic-bezier(0.34,1.35,0.64,1)] will-change-transform";
+    "w-full h-12 px-4 flex items-center justify-center gap-2.5 rounded-full border border-foreground/15 bg-transparent text-foreground/90 text-[14px] font-medium hover:border-foreground/40 hover:bg-foreground/[0.03] active:scale-[0.97] transition-[transform,border-color,background-color] duration-[280ms] [transition-timing-function:cubic-bezier(0.34,1.35,0.64,1)] will-change-transform";
 
   // ─── Mobile intro — inline expandable email/password flow ──
   if (isMobile && (step === "intro1" || step === "email" || step === "password")) {
@@ -973,7 +973,7 @@ const AuthPage = () => {
                         </button>
                       </div>
 
-                      <div className="my-6 flex items-center gap-3">
+                      <div className="my-5 flex items-center gap-3">
                         <div className="flex-1 h-px bg-foreground/10" />
                         <span className="text-[10px] text-foreground/65 uppercase tracking-[0.25em]">
                           {authT("or")}
@@ -981,7 +981,7 @@ const AuthPage = () => {
                         <div className="flex-1 h-px bg-foreground/10" />
                       </div>
 
-                      <div className="space-y-3.5">
+                      <div className="space-y-3">
                         <button onClick={handleGoogleLogin} className={socialCls}>
                           <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24">
                             <path

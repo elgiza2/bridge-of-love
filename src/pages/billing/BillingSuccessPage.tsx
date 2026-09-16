@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import SecondMonthOfferCard from "@/components/billing/SecondMonthOfferCard";
 import { clearAbandonedCheckout } from "@/lib/pricingOffers";
 import { trackTikTokCompletePayment } from "@/lib/analytics/tiktokPixel";
+import { markIntroTrialUsed } from "@/lib/introTrial";
 
 const mobileFont =
   "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif";
@@ -27,8 +28,11 @@ const BillingSuccessPage = () => {
 
   // A paid checkout cancels the come-back ($5) offer.
   useEffect(() => {
-    if (status === "success") clearAbandonedCheckout();
-  }, [status]);
+    if (status === "success") {
+      clearAbandonedCheckout();
+      if (details?.is_subscription) markIntroTrialUsed();
+    }
+  }, [details, status]);
 
   useEffect(() => {
     // Only a payment the database confirmed as paid reaches here.

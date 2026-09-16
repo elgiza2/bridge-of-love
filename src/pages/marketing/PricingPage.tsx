@@ -42,7 +42,7 @@ import { brandText, getZoneBrand } from "@/lib/zoneBrand";
 import { isEgMode } from "@/lib/egMode";
 import { isArabBilling } from "@/lib/payRegion";
 import { useUserLang } from "@/lib/authI18n";
-import { useIntroTrialEligible, markIntroTrialUsed } from "@/lib/introTrial";
+import { useIntroTrialEligible } from "@/lib/introTrial";
 import { cn } from "@/lib/utils";
 import { useUserPlan } from "@/hooks/useUserPlan";
 
@@ -209,7 +209,6 @@ const PricingPage = () => {
           throw new Error(kErr?.message || kData?.error || "Checkout failed");
         }
         markCheckoutOpened(interval);
-        if (trial) markIntroTrialUsed();
         window.location.href = kData.checkout_url;
         return;
       }
@@ -239,7 +238,6 @@ const PricingPage = () => {
       }
       if (data?.url) {
         markCheckoutOpened(interval);
-        if (trial) markIntroTrialUsed();
         window.location.href = data.url;
       } else throw new Error(data?.error || "Checkout failed");
     } catch (e: any) {
