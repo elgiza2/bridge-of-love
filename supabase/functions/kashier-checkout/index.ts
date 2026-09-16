@@ -72,7 +72,9 @@ Deno.serve(async (request) => {
 
   const merchantId = Deno.env.get("KASHIER_MERCHANT_ID")?.trim();
   const paymentKey = (
-    Deno.env.get("KASHIER_PAYMENT_API_KEY") || Deno.env.get("KASHIER_SECRET")
+    Deno.env.get("KASHIER_API_KEY") ||
+    Deno.env.get("KASHIER_PAYMENT_API_KEY") ||
+    Deno.env.get("KASHIER_SECRET")
   )?.trim();
   if (!merchantId || !paymentKey) return json({ error: "Kashier is not configured" }, 503);
 

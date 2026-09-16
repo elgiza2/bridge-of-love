@@ -56,7 +56,9 @@ Deno.serve(async (request) => {
   if (request.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
   const paymentKey = (
-    Deno.env.get("KASHIER_PAYMENT_API_KEY") || Deno.env.get("KASHIER_SECRET")
+    Deno.env.get("KASHIER_API_KEY") ||
+    Deno.env.get("KASHIER_PAYMENT_API_KEY") ||
+    Deno.env.get("KASHIER_SECRET")
   )?.trim();
   if (!paymentKey) return json({ error: "Kashier is not configured" }, 503);
 
